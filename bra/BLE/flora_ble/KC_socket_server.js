@@ -1,21 +1,63 @@
-/*with help from Tom Igoe, Sandeep Mistry, Jingwen Zhu and Shawn Van Every*/
+/*
+    This node script is a server which is paired with a serial client script 
+    which when functioning together relay serial data from a single serial 
+    device to multiple clients.
+*/
+ 
+ 
+ 
+var http = require('http');
+var fs = require('fs');
+var url =  require('url');
+ 
+ 
+// function handleIt(req, res) {
+//     console.log("The URL is: " + req.url);
+ 
+//     var parsedUrl = url.parse(req.url);
+//     console.log("They asked for " + parsedUrl.pathname);
+ 
+//     var path = parsedUrl.pathname;
+//     if (path == "/") {
+//         path = "index.html";
+//     }
+ 
+//     fs.readFile(__dirname + path,
+//         function (err, fileContents) {
+//             if (err) {
+//                 res.writeHead(500);
+//                 return res.end('Error loading ' + req.url);
+//             }
+//             res.writeHead(200);
+//             res.end(fileContents);
+//         }
+//     );  
+     
+//     console.log("Got a request " + req.url);
+// }
+ 
+ 
+var httpServer = http.createServer(handleIt);
+ 
+httpServer.listen(8080);  
+console.log('Server listening on port 8080');
+ 
+var io = require('socket.io').listen(httpServer);
+ 
+// var socketIdA, socketIdB;
+ 
+io.on('connection', 
+    function (socket) { 
+        console.log("We have a new client: " + socket.id);
 
+     
+        socket.on('sensor', function(data) {
+            console.log(data);
+            io.sockets.emit("sensor", data);
+        });
+    }
+);
 
-
-// include libraries:
-var express = require('express');  //to load express module
-var app = express();  //create an express app
-var http = require('http').Server(app);  //app starts a http server
-var io = require('socket.io')(http);  //require socket.io module
-
-require('locus');
-
-//express.js part
-app.use(express.static('public'));  //app serves static files inside public folder
-
-http.listen(8080, function() {
-  console.log('listening on *:8080');  //server listen on port 8080 for connections
-});
 
 
 var noble = require('noble');
@@ -62,6 +104,8 @@ function readServices() {
   // Look for services and characteristics.
   // Call the explore function when you find them:
   bluefruit.discoverAllServicesAndCharacteristics(explore);
+  //bluefruit.removeListener('disconnect', explore); //eh??
+
 }
 
 // the service/characteristic explore function:
@@ -74,45 +118,47 @@ function explore(error, services, characteristics) {
   // check if each characteristic's UUID matches the shutter UUID:
   for (c in characteristics) {
   
-  	// console.log(characteristics[9].uuid);
-  	// console.log('6e400003b5a3f393e0a9e50e24dcca9e');
+    // console.log(characteristics[9].uuid);
+    // console.log('6e400003b5a3f393e0a9e50e24dcca9e');
 
     // if the uuid matches, copy the whole characteristic into timeCharacteristic:
     if (characteristics[c].uuid == '6e400003b5a3f393e0a9e50e24dcca9e'){ //would I change this to TX or RX???
-    	console.log("uuid matches");
+        console.log("uuid matches");
       characteristics[c].subscribe();    
       console.log("subscribed");       // subscribe to the characteristic
       
       characteristics[c].on('data', readData);  // set a listener for it
+      // sendData(myData); // send it? 
     }
   }
 }
 
 
 function readData(data) {
+    // console.log("ondata");
   // console.log(data);
-  // console.log(parseInt(data));
 
-  myData = parseInt(data); //global var to store data, parsing buffer to int
+     // console.log(parseInt(data));
+     // console.log("we have data")
+
+
+     myData = parseInt(data); //global var to store data, parsing buffer to int
      
-  io.sockets.emit('sensor', myData);     // Send it to all the other clients
 
+//if socket data emission stuff is in here, then I get that warning
 }
 
+// function sendData(data){
+//   io.sockets.on('sensor', function(data) { //WHAT IS WRONG WITH YOU??
+//     // socket.emit.setMaxListeners(0);
+//     console.log("I'm sending data")
+//     console.log("Sent: 'sensor' " + data); //change to myData?
+//     // socket.broadcast.emit('sensor', data);     // Send it to all the other clients
+//     io.sockets.emit('sensor', data);
+//     // io.to(socket.id).emit('sensor', data);
+//   });
+// }
 
 // Scan for peripherals with the camera service UUID:
 noble.on('stateChange', scanForPeripherals);
 noble.on('discover', readPeripheral);
-
-
-//socket.io part
-io.sockets.on('connection', function(socket) {
-console.log("We have a new client: " + socket.id);
-});
-
-
-
-
-
-
-

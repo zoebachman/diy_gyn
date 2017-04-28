@@ -1,16 +1,11 @@
-var port=8080;
-var socket = io.connect('localhost:'+ port);
+
+var socket = io.connect('http://localhost:8080/');
 
 
-// var socket = io.connect();
-// var socket = io.connect('http://localhost:8080/');
 
-
-  // socket = io.connect();
-
-  socket.on('connect', function() {
-    console.log("Connected");
-  });
+socket.on('connect', function() {
+  console.log("Connected");
+});
 
 
 
@@ -20,29 +15,22 @@ var xPos=0;
 
 function setup() {
   createCanvas(400, 300);
-  background(300, 100, 255, 10);
-    socket.on('sensor', function(data) { //***function data from socket server code? 
-    console.log(data);
-    text("sensor value: " + data, 30, 30);
-    graphData(data); //what arguments does this take?
-    });
+  
 }
 
 function draw() {
- fill(255);
-
-
+fill(255);
+background(300, 100, 255, 10);
 
   //graphData(inData); //***does it go hereeeeeeee
-    // socket.on('new touch', function(data) { //***function data from socket server code? 
-    // console.log(data);
-    // text("sensor value: " + data, 30, 30);
-    // graphData(data); //what arguments does this take?
-    // });
+    socket.on('sensor', function(data) { //***function data from socket server code? 
+      console.log(data);
+      text("sensor value: " + data, 30, 30);
+      graphData(data); //what arguments does this take?
+      });
 
     // text("sensor value: " + data, 30, 30);
     // graphData(myData); //what arguments does this take?
-
 
 }
 
