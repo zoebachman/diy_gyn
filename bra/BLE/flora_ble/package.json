@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "locus": "^2.0.1",
     "noble": "^1.8.1"
   }
 }

@@ -1,39 +1,49 @@
+var port=8080;
+var socket = io.connect('localhost:'+ port);
 
 
-//how do I get the socket info in here? 
-
-
-var socket = io.connect();
+// var socket = io.connect();
 // var socket = io.connect('http://localhost:8080/');
 
-socket.on('connect', function() {
-  console.log("Connected");
-});
 
-//Jingwen's code
-// socket.on('new stroke', function(data) {
-//   drawStroke(data.x, data.y, data.h, data.r);
-// });
+  // socket = io.connect();
 
-socket.on('new touch', function(data) { //***function data from socket server code? 
-
-  graphData(inData); //what arguments does this take? 
-});
+  socket.on('connect', function() {
+    console.log("Connected");
+  });
 
 
-var inData; //****this is my data where does it goooooo
+
+var myData; //****this is my data where does it goooooo
 var xPos=0;
 
 
 function setup() {
   createCanvas(400, 300);
   background(300, 100, 255, 10);
-  }
+    socket.on('sensor', function(data) { //***function data from socket server code? 
+    console.log(data);
+    text("sensor value: " + data, 30, 30);
+    graphData(data); //what arguments does this take?
+    });
+}
 
 function draw() {
-  fill(255);
-  text("sensor value: " + inData, 30, 30);
+ fill(255);
+
+
+
   //graphData(inData); //***does it go hereeeeeeee
+    // socket.on('new touch', function(data) { //***function data from socket server code? 
+    // console.log(data);
+    // text("sensor value: " + data, 30, 30);
+    // graphData(data); //what arguments does this take?
+    // });
+
+    // text("sensor value: " + data, 30, 30);
+    // graphData(myData); //what arguments does this take?
+
+
 }
 
 function graphData(newData) {
@@ -46,7 +56,7 @@ function graphData(newData) {
   if (xPos >= width) {
     xPos = 0;
     // clear the screen by resetting the background:
-    background(0x08, 0x16, 0x40);
+    background(300, 100, 255, 10);
   } else {
     // increment the horizontal position for the next reading:
     xPos++;
